@@ -115,19 +115,18 @@ def create_app():
     @app.route("/dashboard")
     @login_required
     def dashboard():
-        # odczytaj filtr z GET ?category=ID
         cat_id = request.args.get('category', type=int)
         q_text = request.args.get('q', type=str, default="")
 
         q = Task.query.filter_by(user_id=current_user.id)
         q = q.order_by(Task.due_date.asc().nulls_last())
-        # jeśli podano category, dołóż filtr
+
         if cat_id:
             q = q.filter(Task.categories.any(id=cat_id))
         if q_text:
             q = q.filter(Task.title.ilike(f"%{q_text}%"))
         tasks = q.all()
-        # pobierz listę wszystkich kategorii do dropdowna
+
         all_categories = Category.query.order_by(Category.name).all()
         return render_template(
             "dashboard.html",
@@ -266,16 +265,13 @@ def create_app():
     @app.route("/calendar")
     @login_required
     def calendar_view():
-        # wybieramy rok/miesiąc z parametru lub z dnia dzisiejszego
         today = date.today()
         year  = int(request.args.get("year", today.year))
         month = int(request.args.get("month", today.month))
 
-        # tablica tygodni, każdy tydzień to lista dni (0 = dzień spoza miesiąca)
         cal = calendar.Calendar(firstweekday=0)
         weeks = cal.monthdayscalendar(year, month)
 
-        # pobieramy zadania w tym miesiącu
         tasks = Task.query.filter_by(user_id=current_user.id).all()
         tasks_by_day = {}
         for t in tasks:

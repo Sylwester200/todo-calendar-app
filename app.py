@@ -118,15 +118,14 @@ def create_app():
         cat_id = request.args.get('category', type=int)
         q_text = request.args.get('q', type=str, default="")
 
-        q = Task.query.filter_by(user_id=current_user.id)
-        q = q.order_by(Task.due_date.asc().nulls_last())
+        task_query = Task.query.filter_by(user_id=current_user.id)
+        task_query = task_query.order_by(Task.due_date.asc().nulls_last())
 
         if cat_id:
-            q = q.filter(Task.categories.any(id=cat_id))
+            task_query = task_query.filter(Task.categories.any(id=cat_id))
         if q_text:
-            q = q.filter(Task.title.ilike(f"%{q_text}%"))
-        tasks = q.all()
-
+            task_query = task_query.filter(Task.title.ilike(f"%{q_text}%"))
+        tasks = task_query.all()
         all_categories = Category.query.order_by(Category.name).all()
         return render_template(
             "dashboard.html",
@@ -171,7 +170,7 @@ def create_app():
             data = form.file.data.stream.read().decode("utf-8")
             reader = csv.DictReader(StringIO(data))
             for row in reader:
-                t = Task(
+                task = Task(
                     title=row["title"],
                     description=row["description"] or None,
                     due_date=datetime.fromisoformat(row["due_date"]) if row["due_date"] else None,
@@ -179,7 +178,7 @@ def create_app():
                     completed=(row["completed"] == "1"),
                     user_id=current_user.id
                 )
-                t.categories = []
+                task.categories = []
                 for name in row["categories"].split(";"):
                     name = name.strip()
                     if not name:
@@ -189,8 +188,8 @@ def create_app():
                         cat = Category(name=name)
                         db.session.add(cat)
                         db.session.flush()
-                    t.categories.append(cat)
-                db.session.add(t)
+                    task.categories.append(cat)
+                db.session.add(task)
             db.session.commit()
             flash("Zaimportowano zadania z CSV", "success")
             return redirect(url_for("dashboard"))
@@ -201,15 +200,15 @@ def create_app():
     def new_task():
         form = TaskForm()
         if form.validate_on_submit():
-            t = Task(
+            task = Task(
                 title=form.title.data,
                 description=form.description.data,
                 due_date=form.due_date.data,
                 priority=form.priority.data,
                 user_id=current_user.id
             )
-            t.categories = Category.query.filter(Category.id.in_(form.categories.data)).all()
-            db.session.add(t)
+            task.categories = Category.query.filter(Category.id.in_(form.categories.data)).all()
+            db.session.add(task)
             db.session.commit()
             flash("Zadanie dodane", "success")
             return redirect(url_for("dashboard"))
@@ -219,16 +218,16 @@ def create_app():
     @app.route("/tasks/<int:id>/edit", methods=["GET", "POST"])
     @login_required
     def edit_task(id):
-        t = Task.query.get_or_404(id)
-        if t.user_id != current_user.id:
+        task = Task.query.get_or_404(id)
+        if task.user_id != current_user.id:
             abort(403)
-        form = TaskForm(obj=t)
+        form = TaskForm(obj=task)
         if form.validate_on_submit():
-            t.title = form.title.data
-            t.description = form.description.data
-            t.due_date = form.due_date.data
-            t.priority = form.priority.data
-            t.categories = Category.query.filter(Category.id.in_(form.categories.data)).all()
+            task.title = form.title.data
+            task.description = form.description.data
+            task.due_date = form.due_date.data
+            task.priority = form.priority.data
+            task.categories = Category.query.filter(Category.id.in_(form.categories.data)).all()
             db.session.commit()
             flash("Zadanie zaktualizowane", "success")
             return redirect(url_for("dashboard"))
@@ -238,10 +237,10 @@ def create_app():
     @app.route("/tasks/<int:id>/delete", methods=["POST"])
     @login_required
     def delete_task(id):
-        t = Task.query.get_or_404(id)
-        if t.user_id != current_user.id:
+        task = Task.query.get_or_404(id)
+        if task.user_id != current_user.id:
             abort(403)
-        db.session.delete(t)
+        db.session.delete(task)
         db.session.commit()
         flash("Zadanie usunięte", "info")
         return redirect(url_for("dashboard"))
@@ -249,14 +248,14 @@ def create_app():
     @app.route("/tasks/<int:id>/toggle", methods=["POST"])
     @login_required
     def toggle_task(id):
-        t = Task.query.get_or_404(id)
-        if t.user_id != current_user.id:
+        task = Task.query.get_or_404(id)
+        if task.user_id != current_user.id:
             abort(403)
-        t.completed = not t.completed
+        task.completed = not task.completed
         db.session.commit()
         flash(
         "Zadanie oznaczone jako ukończone" 
-        if t.completed else 
+        if task.completed else 
         "Zadanie oznaczone jako nieukończone",
         "info"
         )

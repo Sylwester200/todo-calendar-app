@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Rejestracja{% endblock %}
+{% block content %}
+<h2>Rejestracja</h2>
+<form method="post">
+  {{ form.hidden_tag() }}
+
+  <div class="mb-3">
+    {{ form.username.label }} 
+    {{ form.username(class="form-control") }}
+    {% for e in form.username.errors %}
+      <div class="text-danger small">{{ e }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="mb-3">
+    {{ form.email.label }} 
+    {{ form.email(class="form-control") }}
+    {% for e in form.email.errors %}
+      <div class="text-danger small">{{ e }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="mb-3">
+    {{ form.password.label }} 
+    {{ form.password(class="form-control") }}
+    {% for e in form.password.errors %}
+      <div class="text-danger small">{{ e }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="mb-3">
+    {{ form.password2.label }} 
+    {{ form.password2(class="form-control") }}
+    {% for e in form.password2.errors %}
+      <div class="text-danger small">{{ e }}</div>
+    {% endfor %}
+  </div>
+
+  {{ form.submit(class="btn btn-primary") }}
+</form>
+<p class="mt-2">Masz konto? <a href="{{ url_for('login') }}">Zaloguj się</a></p>
+{% endblock %}

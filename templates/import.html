@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Importuj zadania{% endblock %}
+{% block content %}
+  <h2>Import zadań z CSV</h2>
+  <form method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.file.label(class="form-label") }}
+      {{ form.file(class="form-control") }}
+      {% for e in form.file.errors %}
+        <div class="text-danger small">{{ e }}</div>
+      {% endfor %}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+{% endblock %}

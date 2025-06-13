@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Logowanie{% endblock %}
+{% block content %}
+<h2>Logowanie</h2>
+<form method="post">
+  {{ form.hidden_tag() }}
+
+  <div class="mb-3">
+    {{ form.email.label }} 
+    {{ form.email(class="form-control") }}
+    {% for e in form.email.errors %}
+      <div class="text-danger small">{{ e }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="mb-3">
+    {{ form.password.label }} 
+    {{ form.password(class="form-control") }}
+    {% for e in form.password.errors %}
+      <div class="text-danger small">{{ e }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="form-check mb-3">
+    {{ form.remember_me(class="form-check-input") }}
+    {{ form.remember_me.label(class="form-check-label") }}
+  </div>
+
+  {{ form.submit(class="btn btn-primary") }}
+</form>
+<p class="mt-2">Nie masz konta? <a href="{{ url_for('register') }}">Zarejestruj się</a></p>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Twój Dashboard{% endblock %}
+
+{% block content %}
+  <h2>Twoje zadania</h2>
+  <p>
+    <a class="btn btn-success" href="{{ url_for('new_task') }}">
+      + Nowe zadanie
+    </a>
+  </p>
+
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+      <input
+        type="text"
+        id="search"
+        name="q"
+        class="form-control"
+        placeholder="Tytuł zadania…"
+        value="{{ search_query }}">
+    </div>
+    <div class="col-auto">
+      <select name="category" class="form-select">
+        <option value="">Wszystkie kategorie</option>
+        {% for c in categories %}
+          <option value="{{ c.id }}" {% if selected_category == c.id %}selected{% endif %}>
+            {{ c.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-outline-primary">Filtruj</button>
+    </div>
+  </form>
+
+  <p class="mb-3">
+    <a class="btn btn-outline-secondary" href="{{ url_for('export_tasks') }}">
+      Eksportuj CSV
+    </a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('import_tasks') }}">
+      Importuj CSV
+    </a>
+  </p>
+
+  {% if tasks %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Tytuł</th>
+          <th>Kategorie</th>
+          <th>Termin</th>
+          <th>Priorytet</th>
+          <th>Ukończone</th>
+          <th>Akcje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tasks %}
+          <tr>
+            <td>{{ t.title }}</td>
+            <td>
+              {{ t.title }}
+              {% if t.categories %}
+                <div class="small text-muted">
+                  {% for c in t.categories %}<span class="badge bg-secondary">{{ c.name }}</span>{% endfor %}
+                </div>
+              {% endif %}
+            </td>
+            <td>{{ t.due_date or "-" }}</td>
+            <td>{{ t.priority }}</td>
+            <td>{{ "✓" if t.completed else "-" }}</td>
+            <td>
+              <form method="post"
+                    action="{{ url_for('toggle_task', id=t.id) }}"
+                    style="display:inline">
+                <button
+                  class="btn btn-sm {{ 'btn-success' if not t.completed else 'btn-warning' }}"
+                  title="{{ 'Oznacz jako ukończone' if not t.completed else 'Przywróć do nierozpoczętych' }}">
+                  {{ '✓' if not t.completed else '↺' }}
+                </button>
+              </form>
+
+
+              <a class="btn btn-sm btn-primary"
+                href="{{ url_for('edit_task', id=t.id) }}">
+                Edytuj
+              </a>
+
+
+              <form method="post"
+                    action="{{ url_for('delete_task', id=t.id) }}"
+                    style="display:inline">
+                <button class="btn btn-sm btn-danger"
+                        onclick="return confirm('Usunąć zadanie?')">
+                  Usuń
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Brak zadań do wyświetlenia.</p>
+  {% endif %}
+{% endblock %}

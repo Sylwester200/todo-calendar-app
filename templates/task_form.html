@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ action }}{% endblock %}
+
+{% block content %}
+  <h2>{{ action }}</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.title.label }} 
+      {{ form.title(class="form-control") }}
+      {% for e in form.title.errors %}
+        <div class="text-danger small">{{ e }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.description.label }} 
+      {{ form.description(class="form-control", rows=3) }}
+      {% for e in form.description.errors %}
+        <div class="text-danger small">{{ e }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.due_date.label }} 
+      {{ form.due_date(class="form-control") }}
+      {% for e in form.due_date.errors %}
+        <div class="text-danger small">{{ e }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.priority.label }} 
+      {{ form.priority(class="form-select") }}
+      {% for e in form.priority.errors %}
+        <div class="text-danger small">{{ e }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.categories.label }}
+      {{ form.categories(class="form-select", multiple=True) }}
+      {% for e in form.categories.errors %}
+        <div class="text-danger small">{{ e }}</div>
+      {% endfor %}
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Anuluj</a>
+  </form>
+{% endblock %}
